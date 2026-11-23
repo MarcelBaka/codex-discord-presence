@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "appId": null,
+  "pauseUntil": null,
+  "hide": false,
+  "aliases": {},
+  "autostart": false,
+  "autoUpdate": false,
+  "showPlan": true,
+  "showToday": true
+}

@@ -1,0 +1,82 @@
+name: Test and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, node: 24, arch: X64 }
+          - { os: macos-15, node: 24, arch: ARM64 }
+          - { os: macos-15-intel, node: 24, arch: X64 }
+          - { os: ubuntu-24.04, node: 24, arch: X64 }
+          - { os: ubuntu-24.04-arm, node: 24, arch: ARM64 }
+          - { os: ubuntu-24.04, node: 18, arch: X64 }
+          - { os: ubuntu-24.04, node: 22, arch: X64 }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Verify runner architecture
+        shell: bash
+        run: test "$RUNNER_ARCH" = '${{ matrix.arch }}'
+      - run: npm test
+  release:
+    if: github.ref_type == 'tag'
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Verify the release version
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const assert = require('node:assert/strict');
+          const fs = require('node:fs');
+          const { version } = require('./app/version.json');
+          assert.equal(process.env.GITHUB_REF_NAME, 'v' + version);
+          assert.equal(require('./package.json').version, version);
+          assert.ok(fs.readFileSync('CHANGELOG.md', 'utf8').split(/\r?\n/).includes('## ' + version));
+          NODE
+      - name: Package Windows, macOS and Linux installers
+        run: |
+          mkdir -p dist
+          git archive --format=zip --output=dist/codex-discord-presence.zip HEAD app install.cmd install.command install.sh README.md CHANGELOG.md LICENSE config.example.json
+          cp dist/codex-discord-presence.zip dist/codex-discord-presence-windows.zip
+          cp dist/codex-discord-presence.zip dist/codex-discord-presence-macos.zip
+          cp dist/codex-discord-presence.zip dist/codex-discord-presence-linux.zip
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const os = require('node:os');
+          const path = require('node:path');
+          const { extract } = require('./app/update');
+          const target = fs.mkdtempSync(path.join(os.tmpdir(), 'crp-release-'));
+          try {
+            extract(fs.readFileSync('dist/codex-discord-presence.zip'), target);
+            if (!fs.existsSync(path.join(target, 'install.cmd'))) throw Error('Missing installer');
+          } finally {
+            fs.rmSync(target, { recursive: true, force: true });
+          }
+          NODE
+      - name: Publish package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes dist/*.zip

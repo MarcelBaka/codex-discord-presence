@@ -1,0 +1,10 @@
+{
+  "name": "codex-discord-presence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Discord Rich Presence for OpenAI Codex",
+  "bin": { "codex-presence": "app/cli.js" },
+  "engines": { "node": ">=18" },
+  "scripts": { "test": "node --test test/unit.test.js test/e2e.test.js" },
+  "license": "MIT"
+}
