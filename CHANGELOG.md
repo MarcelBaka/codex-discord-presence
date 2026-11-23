@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Start the Windows daemon outside the Codex hook's process job so it can keep running after the hook exits.
+
 ## 0.1.0
 
 - Start local Discord Rich Presence from Codex lifecycle hooks.

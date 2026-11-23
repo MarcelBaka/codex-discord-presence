@@ -62,7 +62,8 @@ function spawnDaemon() {
     args.push('context=' + Buffer.from(JSON.stringify(context)).toString('base64url'));
     const command = [process.execPath, ...args].map(arg => '"' + arg + '"').join(' ');
     const body = [
-      '$startup = New-CimInstance -ClassName Win32_ProcessStartup -ClientOnly -Property @{ShowWindow=0; CreateFlags=134217728}',
+      '$ErrorActionPreference = "Stop"',
+      '$startup = New-CimInstance -ClassName Win32_ProcessStartup -ClientOnly -Property @{ShowWindow=[uint16]0}',
       "$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ProcessStartupInformation=$startup; CommandLine='" +
         command.replace(/'/g, "''") + "'}",
       'if ($r.ReturnValue -ne 0) { exit 1 }'].join('; ');
