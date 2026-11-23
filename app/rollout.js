@@ -225,7 +225,7 @@ function findRecent(since) {
 }
 
 function usageSince(rolloutList, since, pricing) {
-  const usage = { ...zero, tokens: 0, cost: 0, hasData: false, allPriced: true };
+  const usage = { ...zero, tokens: 0, cost: 0, hasData: false, hasPricedData: false, allPriced: true };
   const seen = new Set();
   for (const rollout of rolloutList) {
     if (rollout.id && seen.has(rollout.id)) continue;
@@ -237,6 +237,7 @@ function usageSince(rolloutList, since, pricing) {
       for (const key of keys) usage[key] += sample[key];
       const rate = Object.hasOwn(pricing.models, record.model) ? pricing.models[record.model] : undefined;
       if (rate && (!sample.write || rate.write30m !== undefined)) {
+        usage.hasPricedData = true;
         usage.cost += ((sample.input - sample.cached - sample.write) * rate.input +
           sample.cached * rate.cached + sample.output * rate.output +
           sample.write * (rate.write30m || 0)) / 1e6;

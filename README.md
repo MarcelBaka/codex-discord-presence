@@ -55,7 +55,7 @@ The reader follows rollout JSONL files under `CODEX_HOME/sessions` and `archived
 
 For example, cumulative input of 46,721, cached input of 36,864, and output of 274 produce **10,131 tokens** on the card. The next total is used as a new snapshot. Reasoning tokens are part of output. The session sums records at or after the current session start, even when a conversation is resumed. `status` includes the full observed conversation total separately. The Today total uses the same activity records after local midnight across discovered rollouts. A missing source shows **Tokens: no data**.
 
-Estimates use the model's dated Standard OpenAI API prices. Uncached input, cache hits, cache writes, and output are charged once each at their respective rates. The 30-minute cache-write rate is used when the transcript does not identify a TTL. If a model is absent from the table, the total remains visible without a cost. Pricing is checked daily against the repository, with the bundled JSON available offline. These are API-equivalent estimates. Codex subscriptions use their own accounting.
+Estimates use the model's dated Standard OpenAI API prices. Uncached input, cache hits, cache writes, and output are charged once each at their respective rates. The 30-minute cache-write rate is used when the transcript does not identify a TTL. When some records lack pricing, the card labels the estimate as partial and includes all observed tokens in the count. If no records have a rate, only the token count appears. Pricing is checked daily against the repository, with the bundled JSON available offline. These are API-equivalent estimates. Codex subscriptions use their own accounting.
 
 ## Local data and lifecycle
 

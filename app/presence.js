@@ -29,7 +29,10 @@ function compact(value) {
 
 function formatUsage(usage) {
   if (!usage.hasData) return 'Tokens: no data';
-  return compact(usage.tokens) + ' tokens' + (usage.allPriced ? ' · ~$' + usage.cost.toFixed(2) : '');
+  const tokens = compact(usage.tokens) + ' tokens';
+  if (!usage.hasPricedData) return tokens;
+  const estimate = usage.cost > 0 && usage.cost < 0.01 ? '<$0.01' : '~$' + usage.cost.toFixed(2);
+  return tokens + ' · ' + estimate + (usage.allPriced ? '' : ' (partial)');
 }
 
 function activity(session, settings, usage, clock, icon) {

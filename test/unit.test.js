@@ -10,7 +10,8 @@ const { resolve, live } = require('../app/processes');
 const { selected } = require('../app/registry');
 const { category, eventFrom } = require('../app/hook');
 const { defaultAppId, parseConfig } = require('../app/common');
-const { localPricing, validatePricing } = require('../app/network');
+const { localPricing, validatePricing, iconRefreshInterval } = require('../app/network');
+const { formatUsage } = require('../app/presence');
 const { Discord, frame, decoder, discordPaths } = require('../app/ipc');
 const { desktopExec } = require('../app/install');
 const { extract, crc32 } = require('../app/update');
@@ -75,6 +76,19 @@ test('elapsed time and selection use the active process identity and user input'
   assert.ok(!live(owner, rows));
   const sessions = [{ id: 'new', lastInput: 12, opened: 12 }, { id: 'resume', lastInput: 0, opened: 15 }];
   assert.equal(selected(sessions, () => ({ promptAt: 7 })).id, 'new');
+});
+
+test('mixed usage shows a partial price without omitting unpriced tokens', () => {
+  const priced = { at: 1, model: 'gpt-6.2-sol',
+    usage: { input: 100000, cached: 0, output: 0, reasoning: 0, write: 0 } };
+  const unpriced = { ...priced, model: 'codex-auto-review' };
+  const pricing = localPricing();
+  assert.equal(formatUsage(usageSince([{ records: [priced, unpriced] }], 0, pricing)),
+    '200K tokens · ~$0.20 (partial)');
+  assert.equal(formatUsage(usageSince([{ records: [unpriced] }], 0, pricing)), '100K tokens');
+  assert.equal(formatUsage(usageSince([{ records: [priced] }], 0, pricing)), '100K tokens · ~$0.20');
+  assert.equal(iconRefreshInterval(null), 60_000);
+  assert.equal(iconRefreshInterval('https://cdn.discordapp.com/icon.png'), 86_400_000);
 });
 
 test('sanitize tool events and use only recognized settings and IPC locations', () => {

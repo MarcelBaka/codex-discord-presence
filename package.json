@@ -1,6 +1,6 @@
 {
   "name": "codex-discord-presence",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Local Discord Rich Presence for OpenAI Codex",
   "bin": { "codex-presence": "app/cli.js" },

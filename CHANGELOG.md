@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Keep the available price estimate visible when some usage has no published rate, and label it as partial.
+- Retry missing Discord application icons every minute during an active session.
+
 ## 0.1.1
 
 - Start the Windows daemon outside the Codex hook's process job so it can keep running after the hook exits.

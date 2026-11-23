@@ -45,7 +45,7 @@ async function iconFor(id) {
   let saved;
   try {
     saved = optional(name);
-    if (saved && Date.now() - saved.checked < 86_400_000) return saved.url;
+    if (saved && Date.now() - saved.checked < iconRefreshInterval(saved.url)) return saved.url;
   } catch {}
   try {
     const app = JSON.parse(await get('https://discord.com/api/v10/applications/' + id + '/rpc'));
@@ -57,6 +57,10 @@ async function iconFor(id) {
     log('public Discord icon lookup unavailable');
     return saved?.url || null;
   }
+}
+
+function iconRefreshInterval(url) {
+  return url ? 86_400_000 : 60_000;
 }
 
 function validatePricing(value) {
@@ -109,4 +113,4 @@ async function refreshPricing() {
   write(file, { checked: Date.now(), pricing });
 }
 
-module.exports = { get, iconFor, validatePricing, localPricing, refreshPricing, githubToken };
+module.exports = { get, iconFor, iconRefreshInterval, validatePricing, localPricing, refreshPricing, githubToken };

@@ -6,7 +6,7 @@ const { processes } = require('./processes');
 const { Registry, selected } = require('./registry');
 const { Rollout, usageSince, findRecent } = require('./rollout');
 const { activity } = require('./presence');
-const { iconFor, localPricing, refreshPricing } = require('./network');
+const { iconFor, iconRefreshInterval, localPricing, refreshPricing } = require('./network');
 
 async function serve() {
   let stopping = false;
@@ -101,11 +101,16 @@ async function serve() {
       }
 
       const id = settings.appId || defaultAppId;
-      if (id !== iconId || (session && now >= nextIcon)) {
+      if (session && (id !== iconId || now >= nextIcon)) {
         if (id !== iconId) icon = undefined;
         iconId = id;
-        nextIcon = now + 86_400_000;
-        iconFor(id).then(result => { if (iconId === id) icon = result; }).catch(() => {});
+        nextIcon = now + iconRefreshInterval(icon);
+        iconFor(id).then(result => {
+          if (iconId === id) {
+            icon = result;
+            nextIcon = Date.now() + iconRefreshInterval(icon);
+          }
+        }).catch(() => {});
       }
       const usage = usageSince(session?.rollout ? [session.rollout] : [], session?.start, pricing);
       const history = usageSince(session?.rollout ? [session.rollout] : [], 0, pricing);
