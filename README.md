@@ -1,25 +1,36 @@
 # Codex Discord Presence
 
-Show your current OpenAI Codex project and usage in desktop Discord on Windows, macOS, or Linux. Requires Node.js 18+, a local Codex build with lifecycle hooks, and the desktop Discord client. Git is optional for repository name detection.
+Show your current OpenAI Codex project, activity, token usage, and estimated API cost on your Discord profile. The card includes a session timer and shows the model, reasoning effort, and plan in the icon tooltip when those details are available.
+
+![Discord activity card for Codex showing a project, token count, estimated API cost, and elapsed time](docs/discord-presence.png)
+
+The card uses Discord's **Watching** activity type. Find it under **Profile → Activity**. The example shows `Project: z`, the name of the working folder for that session.
 
 ## Install
 
-Download the ZIP from [Releases](https://github.com/MarcelBaka/codex-discord-presence/releases), extract it, and run the installer in a terminal.
+You need Node.js 18+, desktop Discord, and a local Codex build with lifecycle hooks. Git is optional for detecting repository names.
 
-| Platform | Command |
-| --- | --- |
-| Windows | `.\install.cmd` |
-| macOS | `./install.command` |
-| Linux | `./install.sh` |
-| Any platform | `node app/cli.js install` |
+Download the ZIP for your system, extract it, and run the installer in a terminal.
 
-Run the installer again with `--autostart` to start at login. By default a Codex hook starts the background process on demand. The installer prints the path to the installed command launcher. Re-running it preserves your settings and any other Codex hooks. Existing hook files are backed up when the installer edits them. Codex `config.toml` is left as-is.
+| Platform | Download | Command |
+| --- | --- | --- |
+| Windows | [Windows ZIP](https://github.com/MarcelBaka/codex-discord-presence/releases/latest/download/codex-discord-presence-windows.zip) | `.\install.cmd` |
+| macOS | [macOS ZIP](https://github.com/MarcelBaka/codex-discord-presence/releases/latest/download/codex-discord-presence-macos.zip) | `./install.command` |
+| Linux | [Linux ZIP](https://github.com/MarcelBaka/codex-discord-presence/releases/latest/download/codex-discord-presence-linux.zip) | `./install.sh` |
 
 1. Start desktop Discord and enable activity sharing under **Activity Privacy**.
-2. Start Codex CLI and review the **Codex Discord Presence** entries in `/hooks`. Trust those entries, then start a fresh thread or submit a prompt to an open thread. For VS Code or Codex Desktop, review the same user-level hooks in their hook settings where available and reload the client.
-3. The built-in Discord application ID is `1574523878280007710`. In Developer Portal, set the application's visible name to **Codex** and upload an icon to show the model, available reasoning effort, and available plan in the hover text. The activity otherwise works without an icon. To use your own application, run `set-app-id <ID>`.
+2. In Codex CLI, open `/hooks` and trust the **Codex Discord Presence** entries.
+3. Start a fresh Codex session and check your Discord profile under **Activity**.
+
+The installer prints the path to the command launcher. You can also run `node app/cli.js install` from the extracted folder. Add `--autostart` for login startup. With the default settings, a trusted Codex hook starts the background process on demand. The installer preserves existing hooks and backs up the hook file when it changes it.
+
+The bundled Discord application ID `1574523878280007710` supplies the **Codex** name and icon. For your own Discord application, run `set-app-id <ID>` and manage its name and icon in Developer Portal.
 
 From a checkout use `node app/cli.js <command>`. You can use the absolute launcher path printed at install time after removing the checkout, or `codex-presence <command>` after linking the checkout with `npm link`.
+
+### Codex Desktop and VS Code
+
+These clients need local session files and access to the same trusted user-level hooks. Review the hooks in the client if it offers a hook settings screen, then start a fresh thread. A conversation that was already open during setup may need a client reload. Codex CLI is the directly tested setup.
 
 ## Commands
 
@@ -63,6 +74,16 @@ Hook output is silent. Tool hooks queue an event type, time, IDs, and a small fi
 
 With a shared app-server, switching views may leave a thread open, as described in [Codex hooks](https://learn.chatgpt.com/docs/hooks). Closing the session or exiting the owner process clears it. Sessions already open before installation need to start a new thread or submit a prompt after the hooks are trusted. Status can be limited when a client does not expose local rollout files, cannot start hooks, or runs in a different environment such as WSL. In WSL, Windows Discord IPC requires an additional bridge and is outside this project.
 
+## Troubleshooting
+
+- **No card in Discord.** Run `doctor` to check desktop Discord IPC and the hook setup, then run `status` while a Codex session is open to check whether Discord acknowledged the activity.
+- **No token count.** The card says **Tokens: no data** until a local rollout contains usable token records.
+- **Partial cost.** The estimate covers records with a published API rate. The token count includes all observed records.
+
 ## Development
 
 Run `npm test`. Tests use a mock Discord server and Codex-like processes executing the installed commands. The GitHub workflow covers Windows x64, macOS arm64 and Intel, Ubuntu x64 and arm64, and Node 18, 22, and 24. A pushed version tag runs the matrix, verifies the version and changelog, and publishes the installer ZIPs.
+
+## License
+
+[MIT](LICENSE)

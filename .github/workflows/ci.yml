@@ -59,7 +59,7 @@ jobs:
       - name: Package Windows, macOS and Linux installers
         run: |
           mkdir -p dist
-          git archive --format=zip --output=dist/codex-discord-presence.zip HEAD app install.cmd install.command install.sh README.md CHANGELOG.md LICENSE config.example.json
+          git archive --format=zip --output=dist/codex-discord-presence.zip HEAD app install.cmd install.command install.sh README.md CHANGELOG.md LICENSE config.example.json docs/discord-presence.png
           cp dist/codex-discord-presence.zip dist/codex-discord-presence-windows.zip
           cp dist/codex-discord-presence.zip dist/codex-discord-presence-macos.zip
           cp dist/codex-discord-presence.zip dist/codex-discord-presence-linux.zip
@@ -72,6 +72,7 @@ jobs:
           try {
             extract(fs.readFileSync('dist/codex-discord-presence.zip'), target);
             if (!fs.existsSync(path.join(target, 'install.cmd'))) throw Error('Missing installer');
+            if (!fs.existsSync(path.join(target, 'docs', 'discord-presence.png'))) throw Error('Missing README preview');
           } finally {
             fs.rmSync(target, { recursive: true, force: true });
           }
